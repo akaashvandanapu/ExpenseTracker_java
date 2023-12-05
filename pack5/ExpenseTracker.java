@@ -3,6 +3,7 @@ package pack5;
 import pack2.*;
 import pack3.*;
 import pack4.*;
+import pack5.UserCreatedException;
 import java.io.BufferedWriter;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -13,6 +14,7 @@ import java.io.IOException;
 import java.util.Scanner;
 
 public class ExpenseTracker {
+
     private static int loggedInProfileId = -1;
     private static Profile loginProfile = null;
     private final static Scanner sc = new Scanner(System.in);
@@ -20,6 +22,8 @@ public class ExpenseTracker {
     private static final String PROFILE_FILE_PATH = "C:/java-text-file-handling/Expense-tracker-file-handling/data.txt";
 
     public static void main(String[] args) {
+
+        try {
 
         while (true) {
             if (loggedInProfileId == -1) {
@@ -53,7 +57,6 @@ public class ExpenseTracker {
                         break;
 
                     case 3:
-                        System.out.println("Thank you for using Expense Tracker!");
                         sc.close();
                         return;
 
@@ -62,16 +65,16 @@ public class ExpenseTracker {
                         break;
                 }
             } else {
-                System.out.print("\033[H\033[2J");
-                System.out.println("Logged in Profile Details \n Profile ID: " + loggedInProfileId);
-                System.out.println("Name " + loginProfile.getName() + "\n");
+                System.out.println("Logged in Profile Details \nProfile ID: " + loggedInProfileId);
+                System.out.println("Name: " + loginProfile.getName() + "\n");
                 System.out.println("1. Profile");
                 System.out.println("2. Display All Profiles from file ");
                 System.out.println("3. Add Expenses");
                 System.out.println("4. Add Income");
                 System.out.println("5. Display Expenses");
                 System.out.println("6. Display Incomes");
-                System.out.println("7. Log Out");
+                System.out.println("7. Surprise");
+                System.out.println("8. Log Out");
 
                 int loggedInChoice = checkNumber("choice");
 
@@ -118,6 +121,9 @@ public class ExpenseTracker {
                         break;
 
                     case 7:
+                        throw new UserCreatedException("\nThis is a user-created exception which is thrown and terminates the program");
+
+                    case 8:
                         loggedInProfileId = -1;
                         loginProfile = null;
                         System.out.println("Logged out successfully.\n");
@@ -128,6 +134,10 @@ public class ExpenseTracker {
                         break;
                 }
             }
+        }
+    }
+        finally{
+            System.out.println("This message is from finally block: \n\"Thank you for using Expense Tracker, Visit again!");
         }
     }
     private static Profile login(int loginProfileId) {
@@ -183,7 +193,7 @@ public class ExpenseTracker {
         String address = sc.nextLine();
 
         loginProfile.setName(name);
-        loginProfile.setAge(age);
+        loginProfile. setAge(age);
         loginProfile.setPhno(phno);
         loginProfile.setAddress(address);
 

@@ -34,7 +34,7 @@ public class Profile {
     private int generateRandomProfileId() {
         Random random = new Random();
         return random.nextInt(1000000); // Adjust the range as needed
-    }
+    }//used package random
 
     public int getProfileId() {
         return profileId;
