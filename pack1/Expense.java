@@ -1,5 +1,4 @@
 package pack1;
-
 public abstract class Expense {
     public String description;
     public double amount;
@@ -12,4 +11,5 @@ public abstract class Expense {
     }
 
     public abstract void displayExpense();
+    
 }

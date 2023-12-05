@@ -1,5 +1,12 @@
 package pack4;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import db.DatabaseConnector;
+
 public class ProfileManager {
     private Profile[] profiles;
     private int profileCount;
@@ -32,4 +39,20 @@ public class ProfileManager {
         }
         return null;
     }
+
+    public boolean profileExistsInDatabase(int profileId) {
+        try (Connection connection = DatabaseConnector.getConnection()) {
+            String sql = "SELECT * FROM profiles WHERE profile_id = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setInt(1, profileId);
+                ResultSet resultSet = preparedStatement.executeQuery();
+
+                return resultSet.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 }

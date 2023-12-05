@@ -2,19 +2,23 @@
 package pack4;
 
 import java.util.Random;
+
+import db.DatabaseConnector;
 import pack1.*;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 public class Profile {
-    private int profileId;
+    private final int profileId;
     private String name;
     private int age;
     private String phno;
     private String address;
-    private Expense[] expenses;
-    private Income[] incomes;
-    private int expenseCount;
+    private final Income[] incomes;
     private int incomeCount;
-    private static final int MAX_EXPENSES = 100;
     private static final int MAX_INCOMES = 100;
 
     public Profile(String name, int age, String phno, String address) {
@@ -23,9 +27,7 @@ public class Profile {
         this.age = age;
         this.phno = phno;
         this.address = address;
-        this.expenses = new Expense[MAX_EXPENSES];
         this.incomes = new Income[MAX_INCOMES];
-        this.expenseCount = 0;
         this.incomeCount = 0;
     }
 
@@ -38,17 +40,24 @@ public class Profile {
         return profileId;
     }
 
-    public String getName() {
-        return name;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public void addExpense(Expense expense) {
-        if (expenseCount < MAX_EXPENSES) {
-            expenses[expenseCount] = expense;
-            expenseCount++;
-        } else {
-            System.out.println("Cannot add more expenses. Maximum limit reached.");
-        }
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public void setPhno(String phno) {
+        this.phno = phno;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public void addIncome(Income income) {
@@ -66,16 +75,6 @@ public class Profile {
         System.out.println("Age: " + age);
         System.out.println("Phone Number: " + phno);
         System.out.println("Address: " + address);
-
-        System.out.println("\nExpenses:");
-        for (int i = 0; i < expenseCount; i++) {
-            expenses[i].displayExpense();
-        }
-
-        System.out.println("\nIncomes:");
-        for (int i = 0; i < incomeCount; i++) {
-            incomes[i].displayIncome();
-        }
     }
 
     public Income[] getIncomes() {
@@ -86,21 +85,144 @@ public class Profile {
         return incomeCount;
     }
 
-     public Expense[] getExpenses() {
-        return expenses;
+    public void insertProfileIntoDatabase() {
+        try (Connection connection = DatabaseConnector.getConnection()) {
+            String sql = "INSERT INTO profiles (profile_id, name, age, phno, address) VALUES (?, ?, ?, ?, ?)";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setInt(1, this.getProfileId());
+                preparedStatement.setString(2, this.getName());
+                preparedStatement.setInt(3, this.age);
+                preparedStatement.setString(4, this.phno);
+                preparedStatement.setString(5, this.address);
+
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
-    public int getExpenseCount() {
-        return expenseCount;
-    }
-    
+    public static Profile retrieveProfileFromDatabase(int profileId) {
+        try (Connection connection = DatabaseConnector.getConnection()) {
+            String sql = "SELECT * FROM profiles WHERE profile_id = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setInt(1, profileId);
+                ResultSet resultSet = preparedStatement.executeQuery();
 
-    // Method to resize the incomes array
-    private void expandIncomeArray() {
-        int newCapacity = incomes.length * 2;
-        Income[] newArray = new Income[newCapacity];
-        System.arraycopy(incomes, 0, newArray, 0, incomes.length);
-        incomes = newArray;
+                if (resultSet.next()) {
+                    String name = resultSet.getString("name");
+                    int age = resultSet.getInt("age");
+                    String phno = resultSet.getString("phno");
+                    String address = resultSet.getString("address");
+
+                    return new Profile(name, age, phno, address);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public void updateProfileInDatabase(int profileId) {
+        try (Connection connection = DatabaseConnector.getConnection()) {
+            String updateQuery = "UPDATE profiles SET name=?, age=?, phno=?, address=? WHERE profile_id=?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
+                preparedStatement.setString(1, this.name);
+                preparedStatement.setInt(2, this.age);
+                preparedStatement.setString(3, this.phno);
+                preparedStatement.setString(4, this.address);
+                preparedStatement.setInt(5, profileId);
+
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace(); // Handle the exception appropriately (log it, throw a custom exception, etc.)
+        }
+    }
+
+    public void insertExpenseIntoDatabase(Expense expense, String typeOfExpense, String frequency, int profileId) {
+        try (Connection connection = DatabaseConnector.getConnection()) {
+            String sql = "INSERT INTO expenses (profile_id, typeofexpense, description, amount, date, frequency) VALUES (?, ?, ?, ?, ?, ?)";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setInt(1, profileId);
+                preparedStatement.setString(2, typeOfExpense); // You need to set the correct type
+                preparedStatement.setString(3, expense.description);
+                preparedStatement.setDouble(4, expense.amount);
+                preparedStatement.setString(5, expense.date);
+                preparedStatement.setString(6, frequency); // You need to set the correct frequency for timely expense
+
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void displayAllExpensesFromDatabase(int profileId) {
+        try (Connection connection = DatabaseConnector.getConnection()) {
+            String sql = "SELECT * FROM expenses WHERE profile_id = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setInt(1, profileId);
+
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        // Retrieve and display expense details
+                        System.out.println("Type: " + resultSet.getString("typeofexpense"));
+                        System.out.println("Description: " + resultSet.getString("description"));
+                        System.out.println("Amount: " + resultSet.getDouble("amount"));
+                        System.out.println("Date: " + resultSet.getString("date"));
+                        System.out.println("Frequency: " + resultSet.getString("frequency"));
+                        System.out.println("--------------");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Retrieve and display expenses by date from the database
+    public void displayExpenseByDateFromDatabase(String date, int profileId) {
+        try (Connection connection = DatabaseConnector.getConnection()) {
+            String sql = "SELECT * FROM expenses WHERE profile_id = ? AND date = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setInt(1, profileId);
+                preparedStatement.setString(2, date);
+
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        // Retrieve and display expense details
+                        System.out.println("Type: " + resultSet.getString("typeofexpense"));
+                        System.out.println("Description: " + resultSet.getString("description"));
+                        System.out.println("Amount: " + resultSet.getDouble("amount"));
+                        System.out.println("Date: " + resultSet.getString("date"));
+                        System.out.println("Frequency: " + resultSet.getString("frequency"));
+                        System.out.println("--------------");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Retrieve and display total expenses from the database
+    public void displayTotalExpenseFromDatabase(int profileId) {
+        try (Connection connection = DatabaseConnector.getConnection()) {
+            String sql = "SELECT SUM(amount) as totalExpense FROM expenses WHERE profile_id = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setInt(1, profileId);
+
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        double totalExpenseAmount = resultSet.getDouble("totalExpense");
+                        System.out.println("Total Amount of Expenses (in Rs): ₹" + totalExpenseAmount + "\n");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
-
