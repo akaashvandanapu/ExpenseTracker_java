@@ -3,7 +3,6 @@ package pack5;
 import pack2.*;
 import pack3.*;
 import pack4.*;
-import pack5.UserCreatedException;
 import java.io.BufferedWriter;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -137,7 +136,7 @@ public class ExpenseTracker {
         }
     }
         finally{
-            System.out.println("This message is from finally block: \n\"Thank you for using Expense Tracker, Visit again!");
+            System.out.println("This message is from finally block: \nThank you for using Expense Tracker, Visit again!");
         }
     }
     private static Profile login(int loginProfileId) {
@@ -177,7 +176,7 @@ public class ExpenseTracker {
                     ", phone number:" + phno + ", address:" + address);
 
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("caught: "+ e);
         }
     }
 
@@ -224,7 +223,7 @@ public class ExpenseTracker {
                 System.out.println(line);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Profile not found.\n");
         }
     }
 

@@ -98,7 +98,7 @@ public class Profile {
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("caught: "+e);
         }
     }
 
@@ -119,7 +119,7 @@ public class Profile {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("caught: "+ e);
         }
         return null;
     }
@@ -137,7 +137,7 @@ public class Profile {
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException e) {
-            e.printStackTrace(); // Handle the exception appropriately (log it, throw a custom exception, etc.)
+            System.out.println("caught: "+ e);
         }
     }
 
@@ -155,7 +155,7 @@ public class Profile {
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("caught: "+ e);
         }
     }
 
@@ -178,7 +178,7 @@ public class Profile {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("caught: "+ e);
         }
     }
 
@@ -203,7 +203,7 @@ public class Profile {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("caught: "+ e);
         }
     }
 
@@ -222,7 +222,7 @@ public class Profile {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("caught: "+ e);
         }
     }
 }
