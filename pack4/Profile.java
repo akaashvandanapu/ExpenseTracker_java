@@ -6,8 +6,12 @@ import java.util.Random;
 import db.DatabaseConnector;
 import pack1.*;
 
+// Import JDBC-related classes for database operations
+// Connection class to store the connection object
 import java.sql.Connection;
+import java.sql.Statement;
 import java.sql.PreparedStatement;
+// To store the ResultSet which is returned by sql statements
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -33,11 +37,15 @@ public class Profile {
 
     private int generateRandomProfileId() {
         Random random = new Random();
-        return random.nextInt(1000000); // Adjust the range as needed
+        return random.nextInt(1000000);
     }//used package random
 
     public int getProfileId() {
         return profileId;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public void setName(String name) {
@@ -56,9 +64,6 @@ public class Profile {
         this.address = address;
     }
 
-    public String getName() {
-        return name;
-    }
 
     public void addIncome(Income income) {
         if (incomeCount < MAX_INCOMES) {
@@ -87,20 +92,16 @@ public class Profile {
 
     public void insertProfileIntoDatabase() {
         try (Connection connection = DatabaseConnector.getConnection()) {
-            String sql = "INSERT INTO profiles (profile_id, name, age, phno, address) VALUES (?, ?, ?, ?, ?)";
-            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-                preparedStatement.setInt(1, this.getProfileId());
-                preparedStatement.setString(2, this.getName());
-                preparedStatement.setInt(3, this.age);
-                preparedStatement.setString(4, this.phno);
-                preparedStatement.setString(5, this.address);
-
-                preparedStatement.executeUpdate();
+            String sql = "INSERT INTO profiles (profile_id, name, age, phno, address) " +
+                    "VALUES (" + this.profileId + ", '" + this.name + "', " + this.age + ", '" + this.phno + "', '" + this.address + "')";
+            try (Statement statement = connection.createStatement()) {
+                statement.executeUpdate(sql);
             }
         } catch (SQLException e) {
-            System.out.println("caught: "+e);
+            System.out.println("caught: " + e);
         }
     }
+
 
     public static Profile retrieveProfileFromDatabase(int profileId) {
         try (Connection connection = DatabaseConnector.getConnection()) {
@@ -126,13 +127,11 @@ public class Profile {
 
     public void updateProfileInDatabase(int profileId) {
         try (Connection connection = DatabaseConnector.getConnection()) {
-            String updateQuery = "UPDATE profiles SET name=?, age=?, phno=?, address=? WHERE profile_id=?";
+            String updateQuery = "UPDATE profiles " +
+                    "SET name=this.name, age=this.age, phno=this.phno, address=this.address " +
+                    "WHERE profile_id=?";
             try (PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
-                preparedStatement.setString(1, this.name);
-                preparedStatement.setInt(2, this.age);
-                preparedStatement.setString(3, this.phno);
-                preparedStatement.setString(4, this.address);
-                preparedStatement.setInt(5, profileId);
+                preparedStatement.setInt(1, profileId);
 
                 preparedStatement.executeUpdate();
             }

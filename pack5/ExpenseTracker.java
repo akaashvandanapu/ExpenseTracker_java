@@ -34,7 +34,7 @@ public class ExpenseTracker {
 
                 int mainChoice = checkNumber("choice");
 
-                System.out.print("\033[H\033[2J");
+                System.out.print("\033[H\033[2J");//clear screen
 
                 switch (mainChoice) {
                     case 1:
@@ -77,7 +77,7 @@ public class ExpenseTracker {
 
                 int loggedInChoice = checkNumber("choice");
 
-                System.out.print("\033[H\033[2J");
+                System.out.print("\033[H\033[2J");//clear screen
 
                 switch (loggedInChoice) {
                     case 1:
@@ -91,7 +91,7 @@ public class ExpenseTracker {
                                 editProfile();
                                 break;
                             case 2:
-                                displayProfile();
+                                displayLoggedInProfile();
                                 break;
                             default:
                                 System.out.println("Invalid choice for Profile.\n");
@@ -192,7 +192,7 @@ public class ExpenseTracker {
         String address = sc.nextLine();
 
         loginProfile.setName(name);
-        loginProfile. setAge(age);
+        loginProfile.setAge(age);
         loginProfile.setPhno(phno);
         loginProfile.setAddress(address);
 
@@ -202,7 +202,7 @@ public class ExpenseTracker {
         System.out.println("Profile updated successfully.\n");
     }
 
-    private static void displayProfile() {
+    private static void displayLoggedInProfile() {
         // Retrieve and display profile information from the database using JDBC
         loginProfile = Profile.retrieveProfileFromDatabase(loggedInProfileId);
 
@@ -218,7 +218,7 @@ public class ExpenseTracker {
         System.out.println("Displaying all profile from file: \n");
         // Display all profiles in the specified format
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(PROFILE_FILE_PATH))) {
-            String line;
+            String line = null;
             while ((line = bufferedReader.readLine()) != null) {
                 System.out.println(line);
             }
@@ -228,15 +228,15 @@ public class ExpenseTracker {
     }
 
     private static void insertExpenseIntoDatabase() {
-        int loggedInChoice;
+        int expenseChoice;
         System.out.println("Select to add your Expense:");
         System.out.println("1. One-Time Expense");
         System.out.println("2. Other Expense");
         System.out.println("3. Timely Expense");
         System.out.println("Enter any other number to backtrack");
-        loggedInChoice = checkNumber("choice");
+        expenseChoice = checkNumber("choice");
 
-        if (loggedInChoice > 3 || loggedInChoice < 1) {
+        if (expenseChoice > 3 || expenseChoice < 1) {
             System.out.println("Going back to the main menu\n");
             return;
         }
@@ -247,7 +247,7 @@ public class ExpenseTracker {
         System.out.print("Date (YYYY-MM-DD): ");
         String date = sc.nextLine();
 
-        switch (loggedInChoice) {
+        switch (expenseChoice) {
             case 1:
                 OneTimeExpense oneTimeExpense = new OneTimeExpense(description, amount, date);
                 loginProfile.insertExpenseIntoDatabase(oneTimeExpense, "One-Time Expense", null, loggedInProfileId);
