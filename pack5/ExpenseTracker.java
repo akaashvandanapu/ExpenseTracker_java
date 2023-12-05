@@ -3,15 +3,21 @@ package pack5;
 import pack2.*;
 import pack3.*;
 import pack4.*;
+import java.io.BufferedWriter;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.io.IOException;
 
 import java.util.Scanner;
 
 public class ExpenseTracker {
-
     private static int loggedInProfileId = -1;
     private static Profile loginProfile = null;
     private final static Scanner sc = new Scanner(System.in);
     private final static ProfileManager profileManager = new ProfileManager(100);
+    private static final String PROFILE_FILE_PATH = "C:/java-text-file-handling/Expense-tracker-file-handling/data.txt";
 
     public static void main(String[] args) {
 
@@ -56,14 +62,16 @@ public class ExpenseTracker {
                         break;
                 }
             } else {
-                System.out.println("Logged In Profile ID: " + loggedInProfileId);
+                System.out.print("\033[H\033[2J");
+                System.out.println("Logged in Profile Details \n Profile ID: " + loggedInProfileId);
                 System.out.println("Name " + loginProfile.getName() + "\n");
                 System.out.println("1. Profile");
-                System.out.println("2. Add Expenses");
-                System.out.println("3. Add Income");
-                System.out.println("4. Display Expenses");
-                System.out.println("5. Display Incomes");
-                System.out.println("6. Log Out");
+                System.out.println("2. Display All Profiles from file ");
+                System.out.println("3. Add Expenses");
+                System.out.println("4. Add Income");
+                System.out.println("5. Display Expenses");
+                System.out.println("6. Display Incomes");
+                System.out.println("7. Log Out");
 
                 int loggedInChoice = checkNumber("choice");
 
@@ -90,22 +98,26 @@ public class ExpenseTracker {
                         break;
 
                     case 2:
-                        insertExpenseIntoDatabase();
+                        displayAllProfilesFromFile();
                         break;
 
                     case 3:
-                        addIncome(loginProfile);
+                        insertExpenseIntoDatabase();
                         break;
 
                     case 4:
-                        displayExpensesMenu(loginProfile, loggedInProfileId);
+                        addIncome(loginProfile);
                         break;
 
                     case 5:
-                        displayIncomesMenu(loginProfile);
+                        displayExpensesMenu(loginProfile, loggedInProfileId);
                         break;
 
                     case 6:
+                        displayIncomesMenu(loginProfile);
+                        break;
+
+                    case 7:
                         loggedInProfileId = -1;
                         loginProfile = null;
                         System.out.println("Logged out successfully.\n");
@@ -145,7 +157,20 @@ public class ExpenseTracker {
 
         loggedInProfileId = newProfile.getProfileId();
         loginProfile = newProfile;
+
+        // Write the new profile to the file
+        try (FileWriter fileWriter = new FileWriter(PROFILE_FILE_PATH, true);
+             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+             PrintWriter printWriter = new PrintWriter(bufferedWriter)) {
+
+            printWriter.println("profileID:" + loggedInProfileId + ", name:" + name + ", age:" + age +
+                    ", phone number:" + phno + ", address:" + address);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
+
 
     private static void editProfile() {
         System.out.print("Edit your name: ");
@@ -177,6 +202,19 @@ public class ExpenseTracker {
             loginProfile.displayProfile();
         } else {
             System.out.println("Profile not found.\n");
+        }
+    }
+
+    private static void displayAllProfilesFromFile() {
+        System.out.println("Displaying all profile from file: \n");
+        // Display all profiles in the specified format
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(PROFILE_FILE_PATH))) {
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                System.out.println(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
