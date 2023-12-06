@@ -128,17 +128,22 @@ public class Profile {
     public void updateProfileInDatabase(int profileId) {
         try (Connection connection = DatabaseConnector.getConnection()) {
             String updateQuery = "UPDATE profiles " +
-                    "SET name=this.name, age=this.age, phno=this.phno, address=this.address " +
+                    "SET name=?, age=?, phno=?, address=? " +
                     "WHERE profile_id=?";
             try (PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
-                preparedStatement.setInt(1, profileId);
+                preparedStatement.setString(1, this.name);   // Assuming this.name is a class variable
+                preparedStatement.setInt(2, this.age);
+                preparedStatement.setString(3, this.phno);
+                preparedStatement.setString(4, this.address);
+                preparedStatement.setInt(5, profileId);
 
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException e) {
-            System.out.println("caught: "+ e);
+            System.out.println("caught: " + e);
         }
     }
+
 
     public void insertExpenseIntoDatabase(Expense expense, String typeOfExpense, String frequency, int profileId) {
         try (Connection connection = DatabaseConnector.getConnection()) {
